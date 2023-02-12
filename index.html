@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <script>
+            const changeUrl = function() {
+                let newUrl = '';
+                const baseUrl = 'http://localhost:3000/';
+                let parts = baseUrl.split('/');
+                if (!parts[parts.length-1]) {
+                    parts.pop();
+                }
+                newUrl = parts.join('/')+'/tarek';
+                window.history.pushState({}, '', newUrl);
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Hello world</h1>
+        <a href="javascript:void(0)" onclick="changeUrl()">Index</a>
+    </body>
+</html>
