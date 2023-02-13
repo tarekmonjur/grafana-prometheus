@@ -5,7 +5,7 @@ const router = express.Router();
 const sleep = async() => new Promise(resolve => setTimeout(resolve, 1000));
 const randomNumber = (range = 9) => Math.floor(Math.random() * range);
 
-router.get('/company', async (req, res) => {
+router.get('/waiting', async (req, res) => {
 
     requestCounter.inc({ method: req.method, page: 'reports' });
 
