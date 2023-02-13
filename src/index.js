@@ -1,13 +1,7 @@
 const express = require('express');
-const prometheus = require('prom-client');
-
+const { prometheus, requestCounter } = require('./prometheus');
+const report = require('./report');
 const app = express();
-
-const requestCounter = new prometheus.Counter({
-    name: 'http_requests_total',
-    help: 'Total number of HTTP requests',
-    labelNames: ['method', 'page']
-});
 
 app.get('/metrics', async (req, res) => {
     res.set('Content-Type', prometheus.register.contentType);
@@ -24,6 +18,8 @@ app.get('/', (req, res) => {
     requestCounter.inc({ method: req.method, page: 'index' });
     res.sendFile(__dirname+'/index.html');
 });
+
+app.use('/waiting', report);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server listening on http://localhost:${process.env.PORT}`);
