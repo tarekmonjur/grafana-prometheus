@@ -1,5 +1,5 @@
 const { Queue, QueueEvents } = require('bullmq');
-const { jobWaitingGauge } = require('./prometheus');
+const { jobWaitingGauge, jobCompleteGauge } = require('./prometheus');
 
 const redisConnection = {
     host: process.env.REDIS_HOST,
@@ -20,15 +20,6 @@ class BullMQueue {
     async addQueue(jobName, jobData) {
         jobData.entry_time = new Date().getTime();
         const job = await this.myQueue.add(jobName, jobData, { delay: 3000, removeOnComplete: 5000, removeOnFail: 5000 });
-        jobWaitingGauge.set({
-            job_id: job.id,
-            company_id: jobData.company_id,
-            group_id: `${jobData.service_id}-${jobData.company_id}`,
-            service_id: jobData.service_id,
-            entry_time: jobData.entry_time,
-            start_time: null,
-            end_time: null,
-        }, 0);
     }
 
     async addJobs(jobName, companys) {
@@ -67,7 +58,7 @@ class BullMQueue {
                     service_id: jobData.service_id,
                     entry_time: jobData.entry_time,
                     start_time: jobData.start_time,
-                    end_time: jobData.end_time,
+                    end_time: null,
                 }, duration);
                 job.update(jobData);
             }
@@ -83,13 +74,13 @@ class BullMQueue {
                 console.log('set end time');
                 jobData.end_time = new Date().getTime();
                 const duration = jobData.end_time - jobData.entry_time;
-                jobWaitingGauge.set({
+                jobCompleteGauge.set({
                     job_id: job.id,
                     company_id: jobData.company_id,
                     group_id: `${jobData.service_id}-${jobData.company_id}`,
                     service_id: jobData.service_id,
                     entry_time: jobData.entry_time,
-                    start_time: null,
+                    start_time: jobData.start_time,
                     end_time: jobData.end_time,
                 }, duration);
                 job.update(jobData);
